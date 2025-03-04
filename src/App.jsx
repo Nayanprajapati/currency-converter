@@ -5,10 +5,28 @@ import { currencyConverter } from "./api/postApi"; // Function to fetch conversi
 import { currencies } from "./utils/currencies"; // Importing the currency list
 import "./index.css"; // Importing the CSS file for styling
 
-// Function to map currencies into Select dropdown format
+// Function to get flag URL using currency code
+const getFlagUrl = (currencyCode) => {
+  return `https://flagcdn.com/w40/${currencyCode
+    .slice(0, 2)
+    .toLowerCase()}.png`;
+};
+
+// Function to map currencies into Select dropdown format with flags
 const formatCurrencies = currencies.map((currency) => ({
   value: currency.code, // Currency code (e.g., USD, INR)
-  label: `${currency.code} ${currency.name} (${currency.code})`, // Display format for dropdown
+  label: (
+    <div style={{ display: "flex", alignItems: "center" }}>
+      <img
+        src={getFlagUrl(currency.code)}
+        alt={currency.code}
+        width="20"
+        height="15"
+        style={{ marginRight: "8px", borderRadius: "3px" }}
+      />
+      {currency.name} ({currency.code})
+    </div>
+  ),
 }));
 
 // Main App component
