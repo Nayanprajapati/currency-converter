@@ -1,11 +1,22 @@
 import { useState } from "react";
+import Select from "react-select"; // ✅ Import react-select
 import { currencyConverter } from "./api/postApi";
-import { currencies } from "./utils/currencies"; // Import the currencies list
+import { currencies } from "./utils/currencies"; // ✅ Import the currency list
+import "./index.css"; // ✅ Import CSS for styling
+
+
+// Function to map currencies into Select dropdown format
+const formatCurrencies = currencies.map((currency) => ({
+  value: currency.code,
+  label: `${(currency.code)} ${currency.name} (${currency.code})`,
+}));
+
+
 
 const App = () => {
-  const [amount, setAmount] = useState(0);
-  const [fromCurrency, setFromCurrency] = useState("USD");
-  const [toCurrency, setToCurrency] = useState("INR");
+  const [amount, setAmount] = useState(1);
+  const [fromCurrency, setFromCurrency] = useState(formatCurrencies[0]);
+  const [toCurrency, setToCurrency] = useState(formatCurrencies[3]); // Default INR
   const [convertedAmount, setConvertedAmount] = useState(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
@@ -14,7 +25,7 @@ const App = () => {
     setLoading(true);
     setError(null);
     try {
-      const res = await currencyConverter(fromCurrency, toCurrency, amount);
+      const res = await currencyConverter(fromCurrency.value, toCurrency.value, amount);
       const { conversion_result } = await res.data;
       setLoading(false);
       setConvertedAmount(conversion_result);
@@ -29,54 +40,38 @@ const App = () => {
       <div className="currency-div">
         <h1>Currency Converter</h1>
         <div>
-          <label htmlFor="currency_amount">
-            Amount:
-            <input
-              type="number"
-              id="currency_amount"
-              value={amount}
-              onChange={(e) => setAmount(e.target.value)}
-            />
-          </label>
+          <label htmlFor="currency_amount">Amount:</label>
+          <input
+            type="number"
+            id="currency_amount"
+            value={amount}
+            onChange={(e) => setAmount(e.target.value)}
+          />
         </div>
 
+        {/* Improved Dropdowns */}
         <div className="currency-selector">
           <div>
-            <label>
-              From:
-              <select
-                value={fromCurrency}
-                onChange={(e) => setFromCurrency(e.target.value)}
-              >
-                {currencies.map((currency) => (
-                  <option key={currency.code} value={currency.code}>
-                    {currency.name} ({currency.code})
-                  </option>
-                ))}
-              </select>
-            </label>
+            <label>From:</label>
+            <Select
+              options={formatCurrencies}
+              value={fromCurrency}
+              onChange={setFromCurrency}
+              className="currency-dropdown"
+            />
           </div>
           <div>
-            <label>
-              To:
-              <select
-                value={toCurrency}
-                onChange={(e) => setToCurrency(e.target.value)}
-              >
-                {currencies.map((currency) => (
-                  <option key={currency.code} value={currency.code}>
-                    {currency.name} ({currency.code})
-                  </option>
-                ))}
-              </select>
-            </label>
+            <label>To:</label>
+            <Select
+              options={formatCurrencies}
+              value={toCurrency}
+              onChange={setToCurrency}
+              className="currency-dropdown"
+            />
           </div>
         </div>
 
-        <button
-          disabled={loading || amount <= 0}
-          onClick={handleConvertCurrency}
-        >
+        <button disabled={loading || amount <= 0} onClick={handleConvertCurrency}>
           {loading ? "Converting..." : "Convert"}
         </button>
 
@@ -84,8 +79,7 @@ const App = () => {
         {convertedAmount && (
           <div>
             <h2>
-              {amount} {fromCurrency} = {convertedAmount.toFixed(2)}{" "}
-              {toCurrency}
+              {amount} {fromCurrency.value} = {convertedAmount.toFixed(2)} {toCurrency.value}
             </h2>
           </div>
         )}
